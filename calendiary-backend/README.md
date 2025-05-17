@@ -1,10 +1,18 @@
 How to run:
 - Make sure Docker is installed and runinng https://www.docker.com/products/docker-desktop/
-- Make sure Intellij's Docker Plugin is installed
 - Run docker.compose.yml file
 - Start Application
 
+Make sure these Intellij Plugins are installed:
+- Lombok
+- Docker
 
+Settings:
+Settings > Build > Compiler > Annotation Processors
+✔ Enable annotation processing
+
+Links:
+- SQL Queries with JPA Query Methods: https://docs.spring.io/spring-data/jpa/reference/jpa/query-methods.html
 
 calendiary-backend/
 ├── src/

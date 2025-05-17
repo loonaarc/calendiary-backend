@@ -15,6 +15,8 @@ spring:
     properties:
       hibernate:
         format_sql: true
+  autoconfigure:
+    exclude: org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration #no credentials on 8080 login
 
 # SpringDoc OpenAPI (Swagger)
 springdoc:
@@ -24,3 +26,11 @@ springdoc:
     path: /swagger-ui.html
     tags-sorter: alpha
     operations-sorter: alpha
+
+jwt:
+  secret: your-256-bit-secret-key-must-be-at-least-32-chars-long
+  issuer: "auth-backend"
+
+auth:
+  service:
+      base-url: http://your-colleagues-auth-backend:8080 # Get this from your colleague
