@@ -12,14 +12,14 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/v1/calendar/entries")
+@RequestMapping("/calendar")
 @RequiredArgsConstructor //Lobok generates a constructor at compile time with all final fields as parameter
 public class CalendarEntryController {
     private final CalendarEntryService service; //looks for @Service-annotated implementation and auto-injects
     private final TokenValidator tokenValidator;
 
     //Get all entries
-    @GetMapping("/all")
+    @GetMapping("/all-entries")
     public List<CalendarEntryResponseDTO> getAllEntries() {
         return service.getAllEntries();
     }

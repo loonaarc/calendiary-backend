@@ -14,6 +14,12 @@ Settings:
 Settings > Build > Compiler > Annotation Processors
 ✔ Enable annotation processing
 
+
+my bearer token for:
+- lilie@test.com
+- test123
+- eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJsaWxpZUB0ZXN0LmNvbSIsImlhdCI6MTc0ODAzMTA3NiwiZXhwIjoxNzQ4MDMxOTc2fQ.rqXfZpdByXtFy0gGKQrvL7KYyeqgzt2Uljn6emdwAIQ
+
 Links:
 - SQL Queries with JPA Query Methods: https://docs.spring.io/spring-data/jpa/reference/jpa/query-methods.html
 

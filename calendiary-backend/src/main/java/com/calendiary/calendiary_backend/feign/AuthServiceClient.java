@@ -1,6 +1,7 @@
 package com.calendiary.calendiary_backend.feign;
 
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 
@@ -10,6 +11,6 @@ import org.springframework.web.bind.annotation.RequestHeader;
 )
 public interface AuthServiceClient {
 
-    @PostMapping("/auth/validate")
+    @GetMapping("/auth/validate")
     AuthResponse validateToken(@RequestHeader("Authorization") String token);
 }
