@@ -19,8 +19,8 @@ public record CreateCalendarEntryDTO(
         String location,
         String label,
         String diaryEntry,
-        double moodRating,
-        UUID userId
+        Double moodRating,
+        Long userId
 ) {
 
 }

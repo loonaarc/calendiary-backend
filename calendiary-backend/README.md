@@ -1,4 +1,7 @@
 How to run:
+- This project uses Java 21. Make sure Java 21 is installed: https://www.oracle.com/java/technologies/javase/jdk21-archive-downloads.html
+  - Makse sue Java 21 ist set as JAVA_HOME under system variables
+  - Refresh maven restart IntellIj if necessary
 - Make sure Docker is installed and runinng https://www.docker.com/products/docker-desktop/
 - Run docker.compose.yml file
 - Start Application

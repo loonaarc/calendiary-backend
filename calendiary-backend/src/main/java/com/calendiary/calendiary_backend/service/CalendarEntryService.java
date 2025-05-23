@@ -2,6 +2,7 @@ package com.calendiary.calendiary_backend.service;
 
 import com.calendiary.calendiary_backend.dto.CalendarEntryResponseDTO;
 import com.calendiary.calendiary_backend.dto.CreateCalendarEntryDTO;
+import com.calendiary.calendiary_backend.exceptions.DatabaseException;
 import com.calendiary.calendiary_backend.model.CalendarEntryEntity;
 import com.calendiary.calendiary_backend.repository.CalendarEntryRepository;
 import lombok.RequiredArgsConstructor;
@@ -22,11 +23,16 @@ public class CalendarEntryService {
                 .toList();
     }
 
-    public List<CalendarEntryResponseDTO> getEntriesForUser(String userId) {
-        return repository.findByUserId(userId)
-                .stream()
-                .map(this::fromEntity)
-                .toList();
+    public List<CalendarEntryResponseDTO> getEntriesForUser(String userId) throws DatabaseException {
+        try {
+            return repository.findByUserId(Long.parseLong(userId))
+                    .stream()
+                    .map(this::fromEntity)
+                    .toList();
+        } catch (IllegalArgumentException iae) {
+            throw new DatabaseException();
+        }
+
     }
 
     public CalendarEntryResponseDTO fromEntity(CalendarEntryEntity entity) {

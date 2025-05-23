@@ -14,8 +14,8 @@ import java.util.UUID;
 @Entity
 @Getter @Setter @NoArgsConstructor
 public class CalendarEntryEntity {
-    @Id @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY) //for ID generation of type long and integer
+    private Long id;
 
     @NotBlank(message = "Title is required")
     private String title;
@@ -32,9 +32,9 @@ public class CalendarEntryEntity {
     private String diaryEntry;
 
     @Min(0) @Max(5)
-    private double moodRating;
+    private Double moodRating;
 
-    private UUID userId;
+    private Long userId;
 
     public CalendarEntryEntity(CalendarEntryResponseDTO dto) {
         title = dto.title();

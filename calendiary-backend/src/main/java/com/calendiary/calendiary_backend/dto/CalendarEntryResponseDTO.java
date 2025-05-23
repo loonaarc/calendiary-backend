@@ -12,7 +12,7 @@ generates public getters without "get"
 creates constructor with all fields
  */
 public record CalendarEntryResponseDTO(
-        UUID id,
+        Long id,
         @NotBlank String title,
         String description,
         LocalDateTime startTime,
@@ -20,8 +20,8 @@ public record CalendarEntryResponseDTO(
         String location,
         String label,
         String diaryEntry,
-        double moodRating,
-        UUID userId
+        Double moodRating,
+        Long userId
 ) {
     public static CalendarEntryResponseDTO fromEntity(CalendarEntryEntity entity) {
         return new CalendarEntryResponseDTO(

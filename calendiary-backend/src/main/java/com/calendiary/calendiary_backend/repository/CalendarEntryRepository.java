@@ -20,5 +20,5 @@ JpaRepository, like:
 @Repository
 public interface CalendarEntryRepository extends JpaRepository<CalendarEntryEntity, UUID> {
     List<CalendarEntryEntity> findByStartTimeBetween(LocalDateTime start, LocalDateTime end);
-    List<CalendarEntryEntity> findByUserId(String userId);
+    List<CalendarEntryEntity> findByUserId(Long userId);
 }
