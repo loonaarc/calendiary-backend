@@ -37,6 +37,21 @@ public class CalendarEntryController {
         return ResponseEntity.ok(service.getEntriesForUser(userId));
     }
 
+    @GetMapping("/my-entries/{id}")
+    public ResponseEntity<?> getSingleEntry(
+            @PathVariable("id") String id,
+            @RequestHeader("Authorization") String authHeader) {
+        String userId = tokenValidator.validateAndGetUserId(authHeader);
+        return ResponseEntity.ok(service.getEntryForUser(userId, id));
+    }
+
+    @GetMapping("/my-entries-no-auth/{id}")
+    public ResponseEntity<?> getSingleEntryNoAuth(
+            @PathVariable("id") String id,
+            @RequestParam("userId") String userId) {
+        return ResponseEntity.ok(service.getEntryForUser(userId, id));
+    }
+
     @PostMapping("/my-entries")
     public ResponseEntity<?> createEntry(
             @RequestHeader("Authorization") String authHeader,

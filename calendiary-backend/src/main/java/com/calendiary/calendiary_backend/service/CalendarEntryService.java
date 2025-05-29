@@ -4,7 +4,7 @@ import com.calendiary.calendiary_backend.dto.CalendarEntryRequestDTO;
 import com.calendiary.calendiary_backend.dto.CalendarEntryResponseDTO;
 import com.calendiary.calendiary_backend.dto.CalendarEntryUpdateDTO;
 import com.calendiary.calendiary_backend.exceptions.EntryNotFoundException;
-import com.calendiary.calendiary_backend.exceptions.InvalidUserException;
+import com.calendiary.calendiary_backend.exceptions.InvalidQueryFormat;
 import com.calendiary.calendiary_backend.exceptions.UserNotAuthorizedException;
 import com.calendiary.calendiary_backend.model.CalendarEntryEntity;
 import com.calendiary.calendiary_backend.repository.CalendarEntryRepository;
@@ -27,26 +27,38 @@ public class CalendarEntryService {
                 .toList();
     }
 
-    public List<CalendarEntryResponseDTO> getEntriesForUser(String userId) throws InvalidUserException{
-            return repository.findByUserId(parseUserId(userId))
+    public List<CalendarEntryResponseDTO> getEntriesForUser(String userId) throws InvalidQueryFormat {
+            return repository.findByUserId(parseId(userId))
                     .stream()
                     .map(CalendarEntryService::fromEntityToResponseDTO)
                     .toList();
     }
 
-    public CalendarEntryResponseDTO createEntry(String userId, CalendarEntryRequestDTO dto) throws  InvalidUserException{
-            CalendarEntryEntity entity = repository.save(new CalendarEntryEntity(dto, parseUserId(userId)));
-            return fromEntityToResponseDTO(entity);
-    }
-
-    public CalendarEntryResponseDTO updateEntry(String userId, String id, CalendarEntryUpdateDTO dto) throws InvalidUserException,
-            EntryNotFoundException, UserNotAuthorizedException {
-       Optional<CalendarEntryEntity> optionalEntity = repository.findById(Long.parseLong(id));
+    public CalendarEntryResponseDTO getEntryForUser(String userId, String id) throws InvalidQueryFormat {
+        Optional<CalendarEntryEntity> optionalEntity = repository.findById(parseId(id));
         if (optionalEntity.isEmpty()) {
             throw new EntryNotFoundException();
         }
         CalendarEntryEntity entity = optionalEntity.get();
-        if (!entity.getUserId().equals(parseUserId(userId))) {
+        if (!entity.getUserId().equals(parseId(userId))) {
+            throw new UserNotAuthorizedException();
+        }
+        return fromEntityToResponseDTO(entity);
+    }
+
+    public CalendarEntryResponseDTO createEntry(String userId, CalendarEntryRequestDTO dto) throws InvalidQueryFormat {
+            CalendarEntryEntity entity = repository.save(new CalendarEntryEntity(dto, parseId(userId)));
+            return fromEntityToResponseDTO(entity);
+    }
+
+    public CalendarEntryResponseDTO updateEntry(String userId, String id, CalendarEntryUpdateDTO dto) throws InvalidQueryFormat,
+            EntryNotFoundException, UserNotAuthorizedException {
+       Optional<CalendarEntryEntity> optionalEntity = repository.findById(parseId(id));
+        if (optionalEntity.isEmpty()) {
+            throw new EntryNotFoundException();
+        }
+        CalendarEntryEntity entity = optionalEntity.get();
+        if (!entity.getUserId().equals(parseId(userId))) {
             throw new UserNotAuthorizedException();
         }
         if (dto.title() != null) entity.setTitle(dto.title());
@@ -76,11 +88,11 @@ public class CalendarEntryService {
         );
     }
 
-    public static Long parseUserId(String string) throws InvalidUserException{
+    public static Long parseId(String string) throws InvalidQueryFormat {
         try {
             return Long.parseLong(string);
         } catch (IllegalArgumentException iae) {
-            throw new InvalidUserException();
+            throw new InvalidQueryFormat();
         }
     }
 

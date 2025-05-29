@@ -1,7 +1,7 @@
 package com.calendiary.calendiary_backend.exceptions;
 
-public class InvalidUserException extends RuntimeException {
-    public InvalidUserException() {
+public class InvalidQueryFormat extends RuntimeException {
+    public InvalidQueryFormat() {
         super("User Authentication failed");
     }
 }
