@@ -37,7 +37,7 @@ public class CalendarEntryEntity {
 
     private Long userId;
 
-    public CalendarEntryEntity(CalendarEntryRequestDTO dto) {
+    public CalendarEntryEntity(CalendarEntryRequestDTO dto, Long userId) {
         title = dto.title();
         description = dto.description();
         startTime = dto.startTime();
@@ -46,5 +46,6 @@ public class CalendarEntryEntity {
         label = dto.label();
         diaryEntry = dto.diaryEntry();
         moodRating = dto.moodRating();
+        this.userId = userId;
     }
 }

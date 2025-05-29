@@ -2,7 +2,7 @@ package com.calendiary.calendiary_backend.service;
 
 import com.calendiary.calendiary_backend.dto.CalendarEntryRequestDTO;
 import com.calendiary.calendiary_backend.dto.CalendarEntryResponseDTO;
-import com.calendiary.calendiary_backend.exceptions.DatabaseException;
+import com.calendiary.calendiary_backend.exceptions.InvalidUserException;
 import com.calendiary.calendiary_backend.model.CalendarEntryEntity;
 import com.calendiary.calendiary_backend.repository.CalendarEntryRepository;
 import lombok.RequiredArgsConstructor;
@@ -23,21 +23,24 @@ public class CalendarEntryService {
                 .toList();
     }
 
-    public List<CalendarEntryResponseDTO> getEntriesForUser(String userId) throws DatabaseException {
+    public List<CalendarEntryResponseDTO> getEntriesForUser(String userId) throws InvalidUserException{
         try {
             return repository.findByUserId(Long.parseLong(userId))
                     .stream()
                     .map(CalendarEntryService::fromEntityToResponseDTO)
                     .toList();
         } catch (IllegalArgumentException iae) {
-            throw new DatabaseException();
+            throw new InvalidUserException();
         }
-
     }
 
-    public CalendarEntryResponseDTO createEntry(String userId, CalendarEntryRequestDTO dto) {
-        CalendarEntryEntity entity = new CalendarEntryEntity(dto);
-        return  fromEntityToResponseDTO(entity);
+    public CalendarEntryResponseDTO createEntry(String userId, CalendarEntryRequestDTO dto) throws  InvalidUserException{
+        try {
+            CalendarEntryEntity entity = repository.save(new CalendarEntryEntity(dto, Long.parseLong(userId)));
+            return fromEntityToResponseDTO(entity);
+        } catch (IllegalArgumentException iae) {
+            throw new InvalidUserException();
+        }
     }
 
     public static CalendarEntryResponseDTO fromEntityToResponseDTO(CalendarEntryEntity entity) {

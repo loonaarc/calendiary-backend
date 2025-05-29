@@ -4,7 +4,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 
-@SpringBootApplication
+@SpringBootApplication //composition annotation of @Configuration @EnableAutoConfiguration @ComponentScan
 @EnableFeignClients
 public class CalendiaryBackendApplication {
 

@@ -33,4 +33,4 @@ jwt:
 
 auth:
   service:
-      base-url: http://your-colleagues-auth-backend:8080 # Get this from your colleague
+      base-url: localhost:8001 # auth backend port
