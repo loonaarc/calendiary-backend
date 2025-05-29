@@ -4,6 +4,7 @@ import com.calendiary.calendiary_backend.model.CalendarEntryEntity;
 import jakarta.validation.constraints.NotBlank;
 
 import java.time.LocalDateTime;
+import java.util.Set;
 import java.util.UUID;
 
 /*records are used for immutable DTOs
@@ -18,7 +19,7 @@ public record CalendarEntryResponseDTO(
         LocalDateTime startTime,
         LocalDateTime endTime,
         String location,
-        String label,
+        Set<String> labels,
         String diaryEntry,
         Double moodRating,
         Long userId

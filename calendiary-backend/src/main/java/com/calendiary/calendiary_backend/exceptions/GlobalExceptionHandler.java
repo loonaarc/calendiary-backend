@@ -31,4 +31,9 @@ public class GlobalExceptionHandler {
     public Object handleConstraintViolation(ConstraintViolationException e) {
         return ResponseUtil.badRequest("Constraint violation", e.getMessage());
     }
+
+    @ExceptionHandler(LabelExistsException.class)
+    public Object handleLabelExistsException(LabelExistsException e) {
+        return ResponseUtil.badRequest("Label already exists for user", e.getMessage());
+    }
 }

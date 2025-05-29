@@ -9,6 +9,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Getter @Setter @NoArgsConstructor
@@ -25,7 +27,14 @@ public class CalendarEntryEntity {
     private LocalDateTime startTime;
     private LocalDateTime endTime;
     private String location;
-    private String label;
+    //private String label;
+    @ManyToMany
+    @JoinTable(
+            name = "entry_label", // name of the table in the database that links entries and labels
+            joinColumns = @JoinColumn(name = "entry_id"), // refers to this entity (CalendarEntry)
+            inverseJoinColumns = @JoinColumn(name = "label_id") // refers to the other entity (Label)
+    )
+    private Set<LabelEntity> labels = new HashSet<>(); //collection of unique labels
 
     @Column(columnDefinition = "TEXT")
     private String diaryEntry;
@@ -41,7 +50,6 @@ public class CalendarEntryEntity {
         startTime = dto.startTime();
         endTime = dto.endTime();
         location = dto.location();
-        label = dto.label();
         diaryEntry = dto.diaryEntry();
         moodRating = dto.moodRating();
         this.userId = userId;

@@ -7,19 +7,25 @@ import com.calendiary.calendiary_backend.exceptions.EntryNotFoundException;
 import com.calendiary.calendiary_backend.exceptions.InvalidQueryFormatException;
 import com.calendiary.calendiary_backend.exceptions.UserNotAuthorizedException;
 import com.calendiary.calendiary_backend.model.CalendarEntryEntity;
+import com.calendiary.calendiary_backend.model.LabelEntity;
 import com.calendiary.calendiary_backend.repository.CalendarEntryRepository;
+import com.calendiary.calendiary_backend.repository.LabelRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 
 @Service
 @RequiredArgsConstructor //Lombok generates the constructor with all final fields as parameters
 public class CalendarEntryService {
     private final CalendarEntryRepository repository; //final forces us to depend on Spring's dependency injection.
+    private final LabelRepository labelRepository;
 
     public List<CalendarEntryResponseDTO> getAllEntries() {
         return repository.findAll()
@@ -29,20 +35,24 @@ public class CalendarEntryService {
     }
 
     public List<CalendarEntryResponseDTO> getEntriesForUser(String userId) throws InvalidQueryFormatException {
-            return repository.findByUserId(parseId(userId))
-                    .stream()
-                    .map(CalendarEntryService::fromEntityToResponseDTO)
-                    .toList();
+        return repository.findByUserId(parseId(userId))
+                .stream()
+                .map(CalendarEntryService::fromEntityToResponseDTO)
+                .toList();
     }
 
     public CalendarEntryResponseDTO getEntry(String userId, String id) throws InvalidQueryFormatException,
-            EntryNotFoundException, UserNotAuthorizedException{
+            EntryNotFoundException, UserNotAuthorizedException {
         return fromEntityToResponseDTO(getEntityFromValidIds(userId, id));
     }
 
     public CalendarEntryResponseDTO createEntry(String userId, CalendarEntryCreateDTO dto) throws InvalidQueryFormatException {
-            CalendarEntryEntity entity = repository.save(new CalendarEntryEntity(dto, parseId(userId)));
-            return fromEntityToResponseDTO(entity);
+        CalendarEntryEntity entity = new CalendarEntryEntity(dto, parseId(userId));
+        if (dto.labels() != null && !dto.labels().isEmpty()) {
+            entity.setLabels(saveNewLabels(dto.labels(), userId));
+        }
+        repository.save(entity);
+        return fromEntityToResponseDTO(entity);
     }
 
     public void deleteEntry(String id, String userId) throws InvalidQueryFormatException,
@@ -63,13 +73,14 @@ public class CalendarEntryService {
         if (dto.startTime() != null) entity.setStartTime(dto.startTime());
         if (dto.endTime() != null) entity.setEndTime(dto.endTime());
         if (dto.location() != null) entity.setLocation(dto.title());
-        if (dto.label() != null) entity.setLabel(dto.label());
+        if (dto.labels() != null && !dto.labels().isEmpty()) {
+            entity.setLabels(saveNewLabels(dto.labels(), userId));
+        }
         if (dto.diaryEntry() != null) entity.setDiaryEntry(dto.diaryEntry());
         if (dto.moodRating() != null) entity.setMoodRating(dto.moodRating());
         repository.save(entity);
         return fromEntityToResponseDTO(entity);
     }
-
 
 
     public static CalendarEntryResponseDTO fromEntityToResponseDTO(CalendarEntryEntity entity) {
@@ -80,7 +91,9 @@ public class CalendarEntryService {
                 entity.getStartTime(),
                 entity.getEndTime(),
                 entity.getLocation(),
-                entity.getLabel(),
+                entity.getLabels().stream()
+                        .map(LabelEntity::getName)
+                        .collect(Collectors.toSet()),
                 entity.getDiaryEntry(),
                 entity.getMoodRating(),
                 entity.getUserId()
@@ -108,11 +121,27 @@ public class CalendarEntryService {
         return entity;
     }
 
+    public Set<LabelEntity> saveNewLabels(Set<String> labels, String userId) {
+        Set<LabelEntity> labelEntities = new HashSet<>();
 
+        for (String labelName : labels) {
+            // Try to find existing label
+            Optional<LabelEntity> label = labelRepository.findByNameAndUserId(labelName, parseId(userId));
 
+            // If not found, create it
+            LabelEntity resolved = label.orElseGet(() -> {
+                LabelEntity newLabel = new LabelEntity();
+                newLabel.setName(labelName);
+                newLabel.setUserId(parseId(userId));
+                return labelRepository.save(newLabel);
+            });
 
+            labelEntities.add(resolved); //links CalendarEntryEntity to labels?
+        }
 
+        return labelEntities;
 
+    }
 
 
 }

@@ -3,6 +3,7 @@ package com.calendiary.calendiary_backend.dto;
 import jakarta.validation.constraints.NotBlank;
 
 import java.time.LocalDateTime;
+import java.util.Set;
 
 /*records are used for immutable DTOs
 makes all fields private final
@@ -15,7 +16,7 @@ public record CalendarEntryCreateDTO(
         LocalDateTime startTime,
         LocalDateTime endTime,
         String location,
-        String label,
+        Set<String> labels,
         String diaryEntry,
         Double moodRating
 ) {
