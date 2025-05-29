@@ -34,3 +34,8 @@ jwt:
 auth:
   service:
       base-url: localhost:8001 # auth backend port
+
+cors:
+  allowed-origin:
+    - http://localhost:8080
+    - http://localhost:3000
