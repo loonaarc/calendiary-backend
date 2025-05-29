@@ -23,18 +23,5 @@ public record CalendarEntryResponseDTO(
         Double moodRating,
         Long userId
 ) {
-    public static CalendarEntryResponseDTO fromEntity(CalendarEntryEntity entity) {
-        return new CalendarEntryResponseDTO(
-                entity.getId(),
-                entity.getTitle(),
-                entity.getDescription(),
-                entity.getStartTime(),
-                entity.getEndTime(),
-                entity.getLocation(),
-                entity.getLabel(),
-                entity.getDiaryEntry(),
-                entity.getMoodRating(),
-                entity.getUserId()
-        );
-    }
+
 }

@@ -1,6 +1,7 @@
 package com.calendiary.calendiary_backend.model;
 
 
+import com.calendiary.calendiary_backend.dto.CalendarEntryRequestDTO;
 import com.calendiary.calendiary_backend.dto.CalendarEntryResponseDTO;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
@@ -36,7 +37,7 @@ public class CalendarEntryEntity {
 
     private Long userId;
 
-    public CalendarEntryEntity(CalendarEntryResponseDTO dto) {
+    public CalendarEntryEntity(CalendarEntryRequestDTO dto) {
         title = dto.title();
         description = dto.description();
         startTime = dto.startTime();
@@ -45,6 +46,5 @@ public class CalendarEntryEntity {
         label = dto.label();
         diaryEntry = dto.diaryEntry();
         moodRating = dto.moodRating();
-        userId = dto.id();
     }
 }

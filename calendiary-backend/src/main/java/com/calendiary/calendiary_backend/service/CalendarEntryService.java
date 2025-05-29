@@ -1,7 +1,7 @@
 package com.calendiary.calendiary_backend.service;
 
+import com.calendiary.calendiary_backend.dto.CalendarEntryRequestDTO;
 import com.calendiary.calendiary_backend.dto.CalendarEntryResponseDTO;
-import com.calendiary.calendiary_backend.dto.CreateCalendarEntryDTO;
 import com.calendiary.calendiary_backend.exceptions.DatabaseException;
 import com.calendiary.calendiary_backend.model.CalendarEntryEntity;
 import com.calendiary.calendiary_backend.repository.CalendarEntryRepository;
@@ -19,7 +19,7 @@ public class CalendarEntryService {
     public List<CalendarEntryResponseDTO> getAllEntries() {
         return repository.findAll()
                 .stream()
-                .map(this::fromEntity)
+                .map(CalendarEntryService::fromEntityToResponseDTO)
                 .toList();
     }
 
@@ -27,7 +27,7 @@ public class CalendarEntryService {
         try {
             return repository.findByUserId(Long.parseLong(userId))
                     .stream()
-                    .map(this::fromEntity)
+                    .map(CalendarEntryService::fromEntityToResponseDTO)
                     .toList();
         } catch (IllegalArgumentException iae) {
             throw new DatabaseException();
@@ -35,7 +35,12 @@ public class CalendarEntryService {
 
     }
 
-    public CalendarEntryResponseDTO fromEntity(CalendarEntryEntity entity) {
+    public CalendarEntryResponseDTO createEntry(String userId, CalendarEntryRequestDTO dto) {
+        CalendarEntryEntity entity = new CalendarEntryEntity(dto);
+        return  fromEntityToResponseDTO(entity);
+    }
+
+    public static CalendarEntryResponseDTO fromEntityToResponseDTO(CalendarEntryEntity entity) {
         return new CalendarEntryResponseDTO(
                 entity.getId(),
                 entity.getTitle(),
@@ -52,14 +57,9 @@ public class CalendarEntryService {
 
 
 
-/*
-    public CalendarEntryDTO createEntry(CalendarEntryDTO dto, String token) {
-        //Validate token and get user info
-        UserInfo user = authClient.validateToken(token);
 
-        CalendarEntryEntity entity = convertT
-    }
-*/
+
+
 
 
 }
