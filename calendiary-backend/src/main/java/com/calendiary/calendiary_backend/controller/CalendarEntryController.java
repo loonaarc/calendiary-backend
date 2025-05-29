@@ -70,7 +70,7 @@ public class CalendarEntryController {
         return ResponseEntity.ok(service.createEntry(userId, body));
     }
 
-    @PutMapping("/my-entries")
+    @PutMapping("/my-entries/{id}")
     public ResponseEntity<?> updateEntry(
             @PathVariable("id") String id,
             @RequestHeader("Authorization") String authHeader,

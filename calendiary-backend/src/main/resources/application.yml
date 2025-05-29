@@ -3,7 +3,6 @@ server:
 
 spring:
   datasource:
-    #url: jdbc:postgresql://localhost:5432/calendiary
     url: jdbc:postgresql://localhost:5433/calendiary
     username: postgres
     password: ´yourpassword´
@@ -16,9 +15,8 @@ spring:
       hibernate:
         format_sql: true
   autoconfigure:
-    exclude: org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration #no credentials on 8080 login
+    exclude: org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration
 
-# SpringDoc OpenAPI (Swagger)
 springdoc:
   api-docs:
     path: /api-docs
@@ -33,9 +31,9 @@ jwt:
 
 auth:
   service:
-      base-url: localhost:8001 # auth backend port
+    base-url: localhost:8001
 
 cors:
   allowed-origins:
-    - http://localhost:8080
     - http://localhost:3000
+    - http://localhost:8080
