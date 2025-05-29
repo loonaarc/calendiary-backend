@@ -2,6 +2,7 @@ package com.calendiary.calendiary_backend.controller;
 
 import com.calendiary.calendiary_backend.dto.CalendarEntryRequestDTO;
 import com.calendiary.calendiary_backend.dto.CalendarEntryResponseDTO;
+import com.calendiary.calendiary_backend.dto.CalendarEntryUpdateDTO;
 import com.calendiary.calendiary_backend.security.TokenValidator;
 import com.calendiary.calendiary_backend.service.CalendarEntryService;
 import jakarta.validation.Valid;
@@ -54,5 +55,20 @@ public class CalendarEntryController {
         return ResponseEntity.ok(service.createEntry(userId, body));
     }
 
+    @PutMapping("/my-entries")
+    public ResponseEntity<?> updateEntry(
+            @RequestHeader("Authorization") String authHeader,
+            @RequestBody @Valid CalendarEntryUpdateDTO body
+    ) {
+        String userId = tokenValidator.validateAndGetUserId(authHeader);
+        return ResponseEntity.ok(service.updateEntry(userId, body));
+    }
 
+    @PutMapping("/my-entries-no-auth")
+    public ResponseEntity<?> updateEntryNoAuth(
+            @RequestParam("userId") String userId,
+            @RequestBody @Valid CalendarEntryUpdateDTO body
+    ) {
+        return ResponseEntity.ok(service.updateEntry(userId, body));
+    }
 }

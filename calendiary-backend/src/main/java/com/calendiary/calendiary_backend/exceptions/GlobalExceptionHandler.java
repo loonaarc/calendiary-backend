@@ -5,7 +5,7 @@ import jakarta.validation.ConstraintViolationException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-@RestControllerAdvice
+@RestControllerAdvice //on uncaught exception Rest Controller consults this class
 public class GlobalExceptionHandler {
     @ExceptionHandler(SecurityException.class)
     public Object handleSecurityException(SecurityException e) {
@@ -13,8 +13,18 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(InvalidUserException.class)
-    public Object handlInvalidUserException(InvalidUserException e) {
+    public Object handleInvalidUserException(InvalidUserException e) {
         return ResponseUtil.notFound("Invalid user", e.getMessage());
+    }
+
+    @ExceptionHandler(EntryNotFoundException.class)
+    public Object handleEntryNotFoudException(EntryNotFoundException e) {
+        return ResponseUtil.notFound("Entry not found", e.getMessage());
+    }
+
+    @ExceptionHandler(UserNotAuthorizedException.class)
+    public Object handleUserNotAuthorizedException(UserNotAuthorizedException e) {
+        return ResponseUtil.notFound("User not authorized", e.getMessage());
     }
 
     @ExceptionHandler(ConstraintViolationException.class)
