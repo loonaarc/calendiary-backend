@@ -57,18 +57,21 @@ public class CalendarEntryController {
 
     @PutMapping("/my-entries")
     public ResponseEntity<?> updateEntry(
+            @PathVariable("id") String id,
             @RequestHeader("Authorization") String authHeader,
             @RequestBody @Valid CalendarEntryUpdateDTO body
     ) {
         String userId = tokenValidator.validateAndGetUserId(authHeader);
-        return ResponseEntity.ok(service.updateEntry(userId, body));
+        return ResponseEntity.ok(service.updateEntry(userId, id, body));
     }
 
-    @PutMapping("/my-entries-no-auth")
+    @PutMapping("/my-entries-no-auth/{id}")
     public ResponseEntity<?> updateEntryNoAuth(
+            @PathVariable("id") String id,
             @RequestParam("userId") String userId,
             @RequestBody @Valid CalendarEntryUpdateDTO body
     ) {
-        return ResponseEntity.ok(service.updateEntry(userId, body));
+        return ResponseEntity.ok(service.updateEntry(userId, id, body));
     }
+
 }

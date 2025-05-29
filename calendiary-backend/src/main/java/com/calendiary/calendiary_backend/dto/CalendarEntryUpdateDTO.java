@@ -6,7 +6,6 @@ import jakarta.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 
 public record CalendarEntryUpdateDTO(
-        @NotNull Long id,
         String title,
         String description,
         LocalDateTime startTime,

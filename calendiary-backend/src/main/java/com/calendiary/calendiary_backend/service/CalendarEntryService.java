@@ -39,9 +39,9 @@ public class CalendarEntryService {
             return fromEntityToResponseDTO(entity);
     }
 
-    public CalendarEntryResponseDTO updateEntry(String userId, CalendarEntryUpdateDTO dto) throws InvalidUserException,
+    public CalendarEntryResponseDTO updateEntry(String userId, String id, CalendarEntryUpdateDTO dto) throws InvalidUserException,
             EntryNotFoundException, UserNotAuthorizedException {
-       Optional<CalendarEntryEntity> optionalEntity = repository.findById(dto.id());
+       Optional<CalendarEntryEntity> optionalEntity = repository.findById(Long.parseLong(id));
         if (optionalEntity.isEmpty()) {
             throw new EntryNotFoundException();
         }
