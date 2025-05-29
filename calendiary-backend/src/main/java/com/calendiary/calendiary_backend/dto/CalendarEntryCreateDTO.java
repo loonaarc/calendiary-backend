@@ -9,7 +9,7 @@ makes all fields private final
 generates public getters without "get"
 creates constructor with all fields
  */
-public record CalendarEntryRequestDTO(
+public record CalendarEntryCreateDTO(
         @NotBlank String title,
         String description,
         LocalDateTime startTime,

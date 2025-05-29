@@ -1,8 +1,7 @@
 package com.calendiary.calendiary_backend.model;
 
 
-import com.calendiary.calendiary_backend.dto.CalendarEntryRequestDTO;
-import com.calendiary.calendiary_backend.dto.CalendarEntryResponseDTO;
+import com.calendiary.calendiary_backend.dto.CalendarEntryCreateDTO;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.Getter;
@@ -10,7 +9,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 @Entity
 @Getter @Setter @NoArgsConstructor
@@ -37,7 +35,7 @@ public class CalendarEntryEntity {
 
     private Long userId;
 
-    public CalendarEntryEntity(CalendarEntryRequestDTO dto, Long userId) {
+    public CalendarEntryEntity(CalendarEntryCreateDTO dto, Long userId) {
         title = dto.title();
         description = dto.description();
         startTime = dto.startTime();

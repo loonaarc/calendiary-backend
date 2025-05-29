@@ -1,6 +1,6 @@
 package com.calendiary.calendiary_backend.controller;
 
-import com.calendiary.calendiary_backend.dto.CalendarEntryRequestDTO;
+import com.calendiary.calendiary_backend.dto.CalendarEntryCreateDTO;
 import com.calendiary.calendiary_backend.dto.CalendarEntryResponseDTO;
 import com.calendiary.calendiary_backend.dto.CalendarEntryUpdateDTO;
 import com.calendiary.calendiary_backend.security.TokenValidator;
@@ -42,20 +42,20 @@ public class CalendarEntryController {
             @PathVariable("id") String id,
             @RequestHeader("Authorization") String authHeader) {
         String userId = tokenValidator.validateAndGetUserId(authHeader);
-        return ResponseEntity.ok(service.getEntryForUser(userId, id));
+        return ResponseEntity.ok(service.getEntry(userId, id));
     }
 
     @GetMapping("/my-entries-no-auth/{id}")
     public ResponseEntity<?> getSingleEntryNoAuth(
             @PathVariable("id") String id,
             @RequestParam("userId") String userId) {
-        return ResponseEntity.ok(service.getEntryForUser(userId, id));
+        return ResponseEntity.ok(service.getEntry(userId, id));
     }
 
     @PostMapping("/my-entries")
     public ResponseEntity<?> createEntry(
             @RequestHeader("Authorization") String authHeader,
-            @RequestBody @Valid CalendarEntryRequestDTO body
+            @RequestBody @Valid CalendarEntryCreateDTO body
     ) {
         String userId = tokenValidator.validateAndGetUserId(authHeader);
         return ResponseEntity.ok(service.createEntry(userId, body));
@@ -65,7 +65,7 @@ public class CalendarEntryController {
     @PostMapping("/my-entries-no-auth")
     public ResponseEntity<?> createEntryNoAuth(
             @RequestParam("userId") String userId,
-            @RequestBody @Valid CalendarEntryRequestDTO body
+            @RequestBody @Valid CalendarEntryCreateDTO body
     ) {
         return ResponseEntity.ok(service.createEntry(userId, body));
     }
@@ -88,5 +88,42 @@ public class CalendarEntryController {
     ) {
         return ResponseEntity.ok(service.updateEntry(userId, id, body));
     }
+
+    @DeleteMapping("/my-entries/{id}")
+    public ResponseEntity<?> deleteEntry(
+            @PathVariable("id") String id,
+            @RequestHeader("Authorization") String authHeader
+    ) {
+        String userId = tokenValidator.validateAndGetUserId(authHeader);
+        service.deleteEntry(id, userId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/my-entries-no-auth/{id}")
+    public ResponseEntity<?> deleteEntryNoAuth(
+            @PathVariable("id") String id,
+            @RequestParam("userId") String userId
+    ) {
+        service.deleteEntry(id, userId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/my-entries")
+    public ResponseEntity<?> deleteAllEntriesForUser(
+            @RequestHeader("Authorization") String authHeader
+    ) {
+        String userId = tokenValidator.validateAndGetUserId(authHeader);
+        service.deleteEntriesForUser(userId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/my-entries-no-auth")
+    public ResponseEntity<?> deleteAllEntriesForUserNoAuth(
+            @RequestParam("userId") String userId
+    ) {
+        service.deleteEntriesForUser(userId);
+        return ResponseEntity.noContent().build();
+    }
+
 
 }

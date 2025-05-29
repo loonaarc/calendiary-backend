@@ -12,8 +12,8 @@ public class GlobalExceptionHandler {
         return ResponseUtil.unauthorized("Invalid token", e.getMessage());
     }
 
-    @ExceptionHandler(InvalidQueryFormat.class)
-    public Object handleInvalidUserException(InvalidQueryFormat e) {
+    @ExceptionHandler(InvalidQueryFormatException.class)
+    public Object handleInvalidUserException(InvalidQueryFormatException e) {
         return ResponseUtil.notFound("Invalid query format", e.getMessage());
     }
 
