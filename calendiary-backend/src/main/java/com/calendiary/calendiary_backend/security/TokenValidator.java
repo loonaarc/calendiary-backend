@@ -6,25 +6,49 @@ import com.calendiary.calendiary_backend.feign.AuthServiceClient;
 import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+/**
+ * Validates a JWT token by forwarding it to the external Auth service.
+ * If the token is valid, extracts the user ID from the response.
+
+ * Example expected response from the Auth service (/auth/validate):
+ * {
+ *   "userId": 123,
+ *   "email": "john.doe@example.com",
+ *   "name": "John Doe",
+ *   "oauthUser": true,
+ *   "faceId": 456
+ * }
+ */
 @Service
 @RequiredArgsConstructor
 public class TokenValidator {
 
     private final AuthServiceClient authClient;
 
+    /**
+     * Validates the given Bearer token by sending it to the Auth service.
+     * Uses caching to avoid redundant validation for the same token.
+     *
+     * @param bearerToken The full Bearer token string, e.g. "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6..."
+     * @return userId (as String) if the token is valid
+     * @throws SecurityException if the token is invalid or the Auth service fails
+     */
     @Cacheable(value = "tokenCache", key = "#bearerToken")
     public String validateAndGetUserId(String bearerToken) {
         try {
             AuthResponse response = authClient.validateToken(bearerToken);
-            return response.userId();
+
+            // You can return other fields from the AuthResponse as needed, such as:
+            // response.email(), response.name(), response.oauthUser(), response.faceId()
+            // For now, we only extract and return the userId.
+            return String.valueOf(response.userId());
+
         } catch (FeignException.Unauthorized e) {
             throw new SecurityException("Invalid token");
         } catch (FeignException e) {
-            throw new SecurityException("Auth service error: " + e.status() + " " + e.getMessage());
+            throw new SecurityException("Auth service error: " + e.status() + " - " + e.getMessage());
         }
     }
 }
