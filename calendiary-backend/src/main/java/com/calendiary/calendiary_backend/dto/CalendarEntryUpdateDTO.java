@@ -11,7 +11,10 @@ public record CalendarEntryUpdateDTO(
         String description,
         LocalDateTime startTime,
         LocalDateTime endTime,
-        String location,
+        String locationName,
+        String fullAddress,
+        Double latitude,
+        Double longitude,
         Set<String> labels,
         String diaryEntry,
         Double moodRating

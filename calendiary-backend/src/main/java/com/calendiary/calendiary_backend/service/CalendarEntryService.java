@@ -27,30 +27,52 @@ public class CalendarEntryService {
     private final CalendarEntryRepository repository; //final forces us to depend on Spring's dependency injection.
     private final LabelRepository labelRepository;
 
+    // --- New helper method to convert DTO to Entity using Lombok @Builder ---
+    private CalendarEntryEntity toEntity(CalendarEntryCreateDTO dto, Long userId) {
+        return CalendarEntryEntity.builder()
+                .title(dto.title())
+                .description(dto.description())
+                .startTime(dto.startTime())
+                .endTime(dto.endTime())
+                .locationName(dto.locationName())    // Mapping new location fields from DTO
+                .fullAddress(dto.fullAddress())      // Mapping new location fields from DTO
+                .latitude(dto.latitude())            // Mapping new location fields from DTO
+                .longitude(dto.longitude())          // Mapping new location fields from DTO
+                .diaryEntry(dto.diaryEntry())
+                .moodRating(dto.moodRating())
+                .userId(userId)
+                // Use the existing saveNewLabels logic to convert Set<String> to Set<LabelEntity>
+                .labels(dto.labels() != null ? saveNewLabels(dto.labels(), String.valueOf(userId)) : new HashSet<>())
+                .build();
+    }
+
+
     public List<CalendarEntryResponseDTO> getAllEntries() {
         return repository.findAll()
                 .stream()
-                .map(CalendarEntryService::fromEntityToResponseDTO)
+                .map(this::fromEntityToResponseDTO) // Changed to use non-static method reference
                 .toList();
     }
 
     public List<CalendarEntryResponseDTO> getEntriesForUser(String userId) throws InvalidQueryFormatException {
         return repository.findByUserId(parseId(userId))
                 .stream()
-                .map(CalendarEntryService::fromEntityToResponseDTO)
+                .map(this::fromEntityToResponseDTO) // Changed to use non-static method reference
                 .toList();
     }
 
     public CalendarEntryResponseDTO getEntry(String userId, String id) throws InvalidQueryFormatException,
             EntryNotFoundException, UserNotAuthorizedException {
-        return fromEntityToResponseDTO(getEntityFromValidIds(userId, id));
+        return fromEntityToResponseDTO(getEntityFromValidIds(userId, id)); // Changed to use non-static method reference
     }
 
     public CalendarEntryResponseDTO createEntry(String userId, CalendarEntryCreateDTO dto) throws InvalidQueryFormatException {
-        CalendarEntryEntity entity = new CalendarEntryEntity(dto, parseId(userId));
-        if (dto.labels() != null && !dto.labels().isEmpty()) {
-            entity.setLabels(saveNewLabels(dto.labels(), userId));
-        }
+        // Using the new toEntity method that utilizes Lombok @Builder
+        CalendarEntryEntity entity = toEntity(dto, parseId(userId));
+        // Labels are now handled within toEntity, so this block might be redundant if labels are never null
+        // if (dto.labels() != null && !dto.labels().isEmpty()) {
+        //     entity.setLabels(saveNewLabels(dto.labels(), userId));
+        // }
         repository.save(entity);
         return fromEntityToResponseDTO(entity);
     }
@@ -72,8 +94,22 @@ public class CalendarEntryService {
         if (dto.description() != null) entity.setDescription(dto.description());
         if (dto.startTime() != null) entity.setStartTime(dto.startTime());
         if (dto.endTime() != null) entity.setEndTime(dto.endTime());
-        if (dto.location() != null) entity.setLocation(dto.title());
-        if (dto.labels() != null && !dto.labels().isEmpty()) {
+
+        // Update new location fields
+        if (dto.locationName() != null) entity.setLocationName(dto.locationName());
+        if (dto.fullAddress() != null) entity.setFullAddress(dto.fullAddress());
+        if (dto.latitude() != null) entity.setLatitude(dto.latitude());
+        if (dto.longitude() != null) entity.setLongitude(dto.longitude());
+        // Handling case where location fields might be explicitly cleared (set to null)
+        // If the DTO field is explicitly null, it means the client wants to clear it.
+        // If it's not null, but empty string/0, that's what gets set.
+        if (dto.locationName() == null) entity.setLocationName(null);
+        if (dto.fullAddress() == null) entity.setFullAddress(null);
+        if (dto.latitude() == null) entity.setLatitude(null);
+        if (dto.longitude() == null) entity.setLongitude(null);
+
+
+        if (dto.labels() != null) { // Check for null first, then if empty
             entity.setLabels(saveNewLabels(dto.labels(), userId));
         }
         if (dto.diaryEntry() != null) entity.setDiaryEntry(dto.diaryEntry());
@@ -82,15 +118,18 @@ public class CalendarEntryService {
         return fromEntityToResponseDTO(entity);
     }
 
-
-    public static CalendarEntryResponseDTO fromEntityToResponseDTO(CalendarEntryEntity entity) {
+    // This method is now non-static to access labelRepository for mapping
+    public CalendarEntryResponseDTO fromEntityToResponseDTO(CalendarEntryEntity entity) {
         return new CalendarEntryResponseDTO(
                 entity.getId(),
                 entity.getTitle(),
                 entity.getDescription(),
                 entity.getStartTime(),
                 entity.getEndTime(),
-                entity.getLocation(),
+                entity.getLocationName(), // Mapping new locationName field
+                entity.getFullAddress(),  // Mapping new fullAddress field
+                entity.getLatitude(),     // Mapping new latitude field
+                entity.getLongitude(),    // Mapping new longitude field
                 entity.getLabels().stream()
                         .map(LabelEntity::getName)
                         .collect(Collectors.toSet()),
@@ -123,16 +162,17 @@ public class CalendarEntryService {
 
     public Set<LabelEntity> saveNewLabels(Set<String> labels, String userId) {
         Set<LabelEntity> labelEntities = new HashSet<>();
+        Long parsedUserId = parseId(userId); // Parse userId once here
 
         for (String labelName : labels) {
-            // Try to find existing label
-            Optional<LabelEntity> label = labelRepository.findByNameAndUserId(labelName, parseId(userId));
+            // Try to find existing label by name and userId
+            Optional<LabelEntity> label = labelRepository.findByNameAndUserId(labelName, parsedUserId);
 
             // If not found, create it
             LabelEntity resolved = label.orElseGet(() -> {
                 LabelEntity newLabel = new LabelEntity();
                 newLabel.setName(labelName);
-                newLabel.setUserId(parseId(userId));
+                newLabel.setUserId(parsedUserId); // Set userId for new labels
                 return labelRepository.save(newLabel);
             });
 
@@ -140,8 +180,5 @@ public class CalendarEntryService {
         }
 
         return labelEntities;
-
     }
-
-
 }

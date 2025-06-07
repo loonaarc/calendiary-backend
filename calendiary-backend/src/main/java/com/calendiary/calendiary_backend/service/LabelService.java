@@ -3,7 +3,7 @@ package com.calendiary.calendiary_backend.service;
 import com.calendiary.calendiary_backend.dto.LabelCreateDTO;
 import com.calendiary.calendiary_backend.dto.LabelResponseDTO;
 import com.calendiary.calendiary_backend.dto.LabelUpdateDTO;
-import com.calendiary.calendiary_backend.exceptions.EntryNotFoundException;
+import com.calendiary.calendiary_backend.exceptions.EntryNotFoundException; // Keep this as requested
 import com.calendiary.calendiary_backend.exceptions.InvalidQueryFormatException;
 import com.calendiary.calendiary_backend.exceptions.LabelExistsException;
 import com.calendiary.calendiary_backend.exceptions.UserNotAuthorizedException;
@@ -17,35 +17,46 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-@RequiredArgsConstructor
+@RequiredArgsConstructor //Lombok generates the constructor with all final fields as parameters
 public class LabelService {
 
     private final LabelRepository repository; //final forces us to depend on Spring's dependency injection.
 
+    // Helper method to convert LabelCreateDTO to LabelEntity using Lombok @Builder
+    private LabelEntity toEntity(LabelCreateDTO dto, Long userId) {
+        return LabelEntity.builder()
+                .name(dto.name())
+                .color(dto.color())
+                .userId(userId)
+                .build();
+    }
+
     public List<LabelResponseDTO> getAllEntries() {
         return repository.findAll()
                 .stream()
-                .map(LabelService::fromEntityToResponseDTO)
+                .map(this::fromEntityToResponseDTO) // Changed to use non-static method reference
                 .toList();
     }
 
     public List<LabelResponseDTO> getEntriesForUser(String userId) throws InvalidQueryFormatException {
         return repository.findByUserId(parseId(userId))
                 .stream()
-                .map(LabelService::fromEntityToResponseDTO)
+                .map(this::fromEntityToResponseDTO) // Changed to use non-static method reference
                 .toList();
     }
 
     public LabelResponseDTO getEntry(String userId, String id) throws InvalidQueryFormatException,
             EntryNotFoundException, UserNotAuthorizedException {
-        return fromEntityToResponseDTO(getEntityFromValidIds(userId, id));
+        return fromEntityToResponseDTO(getEntityFromValidIds(userId, id)); // Changed to use non-static method reference
     }
 
     public LabelResponseDTO createEntry(String userId, LabelCreateDTO dto) throws InvalidQueryFormatException {
-        if (repository.existsByUserIdAndName(parseId(userId), dto.name())) {
+        Long parsedUserId = parseId(userId);
+        if (repository.existsByUserIdAndName(parsedUserId, dto.name())) {
             throw new LabelExistsException();
         }
-        LabelEntity entity = repository.save(new LabelEntity(dto, parseId(userId)));
+        // Using the new toEntity method that utilizes Lombok @Builder
+        LabelEntity entity = repository.save(toEntity(dto, parsedUserId));
         return fromEntityToResponseDTO(entity);
     }
 
@@ -62,17 +73,25 @@ public class LabelService {
     public LabelResponseDTO updateEntry(String userId, String id, LabelUpdateDTO dto) throws InvalidQueryFormatException,
             EntryNotFoundException, UserNotAuthorizedException {
         LabelEntity entity = getEntityFromValidIds(userId, id);
-       if (repository.existsByUserIdAndName(parseId(userId), dto.name())) {
-            throw new LabelExistsException();
+        Long parsedUserId = parseId(userId);
+
+        // Check if the name is being updated and if the new name already exists for another label
+        if (dto.name() != null && !dto.name().equals(entity.getName())) {
+            // Only throw LabelExistsException if a DIFFERENT label with the new name already exists for this user
+            if (repository.existsByUserIdAndName(parsedUserId, dto.name())) {
+                throw new LabelExistsException();
+            }
+            entity.setName(dto.name());
         }
-        if (dto.name() != null) entity.setName(dto.name());
+        // If dto.name() is null, or if it's the same as entity.getName(), do nothing with the name.
+
         if (dto.color() != null) entity.setColor(dto.color());
         repository.save(entity);
         return fromEntityToResponseDTO(entity);
     }
 
-
-    public static LabelResponseDTO fromEntityToResponseDTO(LabelEntity entity) {
+    // Changed to non-static method
+    public LabelResponseDTO fromEntityToResponseDTO(LabelEntity entity) {
         return new LabelResponseDTO(
                 entity.getId(),
                 entity.getName(),
@@ -101,11 +120,4 @@ public class LabelService {
         }
         return entity;
     }
-
-
 }
-
-
-
-
-

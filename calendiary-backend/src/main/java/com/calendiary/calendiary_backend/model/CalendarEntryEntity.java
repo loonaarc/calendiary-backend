@@ -7,13 +7,15 @@ import jakarta.validation.constraints.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
 @Entity
-@Getter @Setter @NoArgsConstructor
+@Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder @Table(name = "calendar_entries")
 public class CalendarEntryEntity {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY) //for ID generation of type long and integer
     private Long id;
@@ -26,8 +28,14 @@ public class CalendarEntryEntity {
 
     private LocalDateTime startTime;
     private LocalDateTime endTime;
-    private String location;
     //private String label;
+
+    private String locationName;
+    private String fullAddress;
+    private Double latitude;
+    private Double longitude;
+
+    @Builder.Default
     @ManyToMany
     @JoinTable(
             name = "entry_label", // name of the table in the database that links entries and labels
@@ -43,15 +51,4 @@ public class CalendarEntryEntity {
     private Double moodRating;
 
     private Long userId;
-
-    public CalendarEntryEntity(CalendarEntryCreateDTO dto, Long userId) {
-        title = dto.title();
-        description = dto.description();
-        startTime = dto.startTime();
-        endTime = dto.endTime();
-        location = dto.location();
-        diaryEntry = dto.diaryEntry();
-        moodRating = dto.moodRating();
-        this.userId = userId;
-    }
 }

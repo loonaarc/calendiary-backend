@@ -5,14 +5,19 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 
 @Entity
-@Table(uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"user_id", "name"})
-})
+@Table(name = "labels", // It's good practice to explicitly name the table
+        uniqueConstraints = {
+                @UniqueConstraint(columnNames = {"user_id", "name"})
+        })
 @Getter
 @Setter
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class LabelEntity {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -20,9 +25,7 @@ public class LabelEntity {
     private String color;
     private Long userId;
 
-    public LabelEntity(LabelCreateDTO dto, Long userId) {
-        name = dto.name();
-        color = dto.color();
-        this.userId = userId;
+    public LabelEntity(String name) {
+        this.name = name;
     }
 }
