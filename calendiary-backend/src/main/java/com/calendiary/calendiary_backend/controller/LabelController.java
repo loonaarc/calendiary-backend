@@ -137,4 +137,25 @@ public class LabelController {
         service.deleteEntriesForUser(userId);
         return ResponseEntity.noContent().build();
     }
+
+    @Operation(summary = "Patch label by id (authenticated)", tags = {"Authenticated Endpoints"})
+    @PatchMapping("/{id}")
+    public ResponseEntity<?> patchEntry(
+            @PathVariable("id") String id,
+            @RequestHeader("Authorization") String authHeader,
+            @RequestBody @Valid LabelUpdateDTO body
+    ) {
+        String userId = tokenValidator.validateAndGetUserId(authHeader);
+        return ResponseEntity.ok(service.patchEntry(userId, id, body));
+    }
+
+    @Operation(summary = "Patch label by id (no auth)", tags = {"No Auth Endpoints"})
+    @PatchMapping("/no-auth/{id}")
+    public ResponseEntity<?> patchEntryNoAuth(
+            @PathVariable("id") String id,
+            @RequestParam("userId") String userId,
+            @RequestBody @Valid LabelUpdateDTO body
+    ) {
+        return ResponseEntity.ok(service.patchEntry(userId, id, body));
+    }
 }
