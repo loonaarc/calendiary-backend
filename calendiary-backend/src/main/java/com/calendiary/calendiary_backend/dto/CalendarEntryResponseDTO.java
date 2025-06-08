@@ -25,6 +25,7 @@ public record CalendarEntryResponseDTO(
         Set<String> labels,
         String diaryEntry,
         Double moodRating,
+        String stage,
         Long userId
 ) {
 

@@ -40,6 +40,7 @@ public class CalendarEntryService {
                 .longitude(dto.longitude())          // Mapping new location fields from DTO
                 .diaryEntry(dto.diaryEntry())
                 .moodRating(dto.moodRating())
+                .stage(dto.stage())
                 .userId(userId)
                 // Use the existing saveNewLabels logic to convert Set<String> to Set<LabelEntity>
                 .labels(dto.labels() != null ? saveNewLabels(dto.labels(), String.valueOf(userId)) : new HashSet<>())
@@ -90,30 +91,23 @@ public class CalendarEntryService {
     public CalendarEntryResponseDTO updateEntry(String userId, String id, CalendarEntryUpdateDTO dto) throws InvalidQueryFormatException,
             EntryNotFoundException, UserNotAuthorizedException {
         CalendarEntryEntity entity = getEntityFromValidIds(userId, id);
-        if (dto.title() != null) entity.setTitle(dto.title());
-        if (dto.description() != null) entity.setDescription(dto.description());
-        if (dto.startTime() != null) entity.setStartTime(dto.startTime());
-        if (dto.endTime() != null) entity.setEndTime(dto.endTime());
+        entity.setTitle(dto.title());
+        entity.setDescription(dto.description());
+        entity.setStartTime(dto.startTime());
+        entity.setEndTime(dto.endTime());
 
         // Update new location fields
-        if (dto.locationName() != null) entity.setLocationName(dto.locationName());
-        if (dto.fullAddress() != null) entity.setFullAddress(dto.fullAddress());
-        if (dto.latitude() != null) entity.setLatitude(dto.latitude());
-        if (dto.longitude() != null) entity.setLongitude(dto.longitude());
         // Handling case where location fields might be explicitly cleared (set to null)
         // If the DTO field is explicitly null, it means the client wants to clear it.
         // If it's not null, but empty string/0, that's what gets set.
-        if (dto.locationName() == null) entity.setLocationName(null);
-        if (dto.fullAddress() == null) entity.setFullAddress(null);
-        if (dto.latitude() == null) entity.setLatitude(null);
-        if (dto.longitude() == null) entity.setLongitude(null);
-
-
-        if (dto.labels() != null) { // Check for null first, then if empty
-            entity.setLabels(saveNewLabels(dto.labels(), userId));
-        }
-        if (dto.diaryEntry() != null) entity.setDiaryEntry(dto.diaryEntry());
-        if (dto.moodRating() != null) entity.setMoodRating(dto.moodRating());
+        entity.setLocationName(dto.locationName());
+        entity.setFullAddress(dto.fullAddress());
+        entity.setLatitude(dto.latitude());
+        entity.setLongitude(dto.longitude());
+        entity.setLabels(saveNewLabels(dto.labels(), userId));
+        entity.setDiaryEntry(dto.diaryEntry());
+        entity.setMoodRating(dto.moodRating());
+        entity.setStage(dto.stage());
         repository.save(entity);
         return fromEntityToResponseDTO(entity);
     }
@@ -135,6 +129,7 @@ public class CalendarEntryService {
                         .collect(Collectors.toSet()),
                 entity.getDiaryEntry(),
                 entity.getMoodRating(),
+                entity.getStage(),
                 entity.getUserId()
         );
     }

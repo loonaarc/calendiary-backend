@@ -50,5 +50,7 @@ public class CalendarEntryEntity {
     @Min(0) @Max(5)
     private Double moodRating;
 
+    private String stage;
+
     private Long userId;
 }

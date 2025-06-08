@@ -21,7 +21,8 @@ public record CalendarEntryCreateDTO(
         Double longitude,
         Set<String> labels,
         String diaryEntry,
-        Double moodRating
+        Double moodRating,
+        String stage
 ) {
 
 }
