@@ -139,5 +139,25 @@ public class CalendarEntryController {
         return ResponseEntity.noContent().build();
     }
 
+    @Operation(summary = "Patch calendar entry by id (authenticated)", tags = {"Authenticated Endpoints"})
+    @PatchMapping("/my-entries/{id}")
+    public ResponseEntity<?> patchEntry(
+            @PathVariable("id") String id,
+            @RequestHeader("Authorization") String authHeader,
+            @RequestBody CalendarEntryUpdateDTO body
+    ) {
+        String userId = tokenValidator.validateAndGetUserId(authHeader);
+        return ResponseEntity.ok(service.patchEntry(userId, id, body));
+    }
+
+    @Operation(summary = "Patch calendar entry by id (no auth)", tags = {"No Auth Endpoints"})
+    @PatchMapping("/my-entries-no-auth/{id}")
+    public ResponseEntity<?> patchEntryNoAuth(
+            @PathVariable("id") String id,
+            @RequestParam("userId") String userId,
+            @RequestBody CalendarEntryUpdateDTO body
+    ) {
+        return ResponseEntity.ok(service.patchEntry(userId, id, body));
+    }
 
 }

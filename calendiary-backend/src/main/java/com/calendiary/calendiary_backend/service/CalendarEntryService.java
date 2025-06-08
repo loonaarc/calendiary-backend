@@ -112,6 +112,30 @@ public class CalendarEntryService {
         return fromEntityToResponseDTO(entity);
     }
 
+    public CalendarEntryResponseDTO patchEntry(String userId, String id, CalendarEntryUpdateDTO dto) throws InvalidQueryFormatException,
+            EntryNotFoundException, UserNotAuthorizedException {
+        CalendarEntryEntity entity = getEntityFromValidIds(userId, id);
+        if (dto.title() != null) entity.setTitle(dto.title());
+        if (dto.description() != null) entity.setDescription(dto.description());
+        if (dto.startTime() != null) entity.setStartTime(dto.startTime());
+        if (dto.endTime() != null) entity.setEndTime(dto.endTime());
+
+        // Update new location fields
+        // Handling case where location fields might be explicitly cleared (set to null)
+        // If the DTO field is explicitly null, it means the client wants to clear it.
+        // If it's not null, but empty string/0, that's what gets set.
+        if (dto.locationName() != null) entity.setLocationName(dto.locationName());
+        if (dto.fullAddress() != null) entity.setFullAddress(dto.fullAddress());
+        if (dto.latitude() != null)  entity.setLatitude(dto.latitude());
+        if (dto.longitude() != null) entity.setLongitude(dto.longitude());
+        if (dto.labels() != null) entity.setLabels(saveNewLabels(dto.labels(), userId));
+        if (dto.diaryEntry() != null) entity.setDiaryEntry(dto.diaryEntry());
+        if (dto.moodRating() != null) entity.setMoodRating(dto.moodRating());
+        if (dto.stage() != null) entity.setStage(dto.stage());
+        repository.save(entity);
+        return fromEntityToResponseDTO(entity);
+    }
+
     // This method is now non-static to access labelRepository for mapping
     public CalendarEntryResponseDTO fromEntityToResponseDTO(CalendarEntryEntity entity) {
         return new CalendarEntryResponseDTO(
