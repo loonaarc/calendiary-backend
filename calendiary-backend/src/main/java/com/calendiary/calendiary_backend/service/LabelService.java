@@ -83,6 +83,25 @@ public class LabelService {
             }
             entity.setName(dto.name());
         }
+
+        entity.setColor(dto.color());
+        repository.save(entity);
+        return fromEntityToResponseDTO(entity);
+    }
+
+    public LabelResponseDTO patchEntry(String userId, String id, LabelUpdateDTO dto) throws InvalidQueryFormatException,
+            EntryNotFoundException, UserNotAuthorizedException {
+        LabelEntity entity = getEntityFromValidIds(userId, id);
+        Long parsedUserId = parseId(userId);
+
+        // Check if the name is being updated and if the new name already exists for another label
+        if (dto.name() != null && !dto.name().equals(entity.getName())) {
+            // Only throw LabelExistsException if a DIFFERENT label with the new name already exists for this user
+            if (repository.existsByUserIdAndName(parsedUserId, dto.name())) {
+                throw new LabelExistsException();
+            }
+            entity.setName(dto.name());
+        }
         // If dto.name() is null, or if it's the same as entity.getName(), do nothing with the name.
 
         if (dto.color() != null) entity.setColor(dto.color());
