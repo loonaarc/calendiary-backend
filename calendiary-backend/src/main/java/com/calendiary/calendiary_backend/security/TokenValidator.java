@@ -1,7 +1,9 @@
 package com.calendiary.calendiary_backend.security;
 
+import com.calendiary.calendiary_backend.exceptions.InvalidQueryFormatException;
 import com.calendiary.calendiary_backend.feign.AuthResponse;
 import com.calendiary.calendiary_backend.feign.AuthServiceClient;
+import com.calendiary.calendiary_backend.service.LabelService;
 
 import feign.FeignException;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +28,7 @@ import org.springframework.stereotype.Service;
 public class TokenValidator {
 
     private final AuthServiceClient authClient;
+    private final LabelService labelService;
 
     /**
      * Validates the given Bearer token by sending it to the Auth service.
@@ -40,10 +43,17 @@ public class TokenValidator {
         try {
             AuthResponse response = authClient.validateToken(bearerToken);
 
-            // You can return other fields from the AuthResponse as needed, such as:
-            // response.email(), response.name(), response.oauthUser(), response.faceId()
-            // For now, we only extract and return the userId.
-            return String.valueOf(response.userId());
+            String userId = String.valueOf(response.userId());
+
+            try {
+                labelService.createDefaultLabelsForUser(userId);
+            } catch (InvalidQueryFormatException e) {
+                System.err.println("Invalid userId format received from Auth Service: " + userId + " - " + e.getMessage());
+                throw new SecurityException("Auth service returned invalid user ID format.");
+            }
+            // *****************************************************************
+
+            return userId;
 
         } catch (FeignException.Unauthorized e) {
             throw new SecurityException("Invalid token");

@@ -13,7 +13,9 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -21,6 +23,18 @@ import java.util.Optional;
 public class LabelService {
 
     private final LabelRepository repository; //final forces us to depend on Spring's dependency injection.
+
+    private static final List<Map<String, String>> DEFAULT_LABELS_DATA = Arrays.asList(
+            Map.of("name", "Study", "color", "#90caf9"),
+            Map.of("name", "Work", "color", "#ffd180"),
+            Map.of("name", "Personal Appointment", "color", "#ce93d8"),
+            Map.of("name", "Healthcare", "color", "#ef9a9a"),
+            Map.of("name", "Sport Activity", "color", "#a5d6a7"),
+            Map.of("name", "Travel", "color", "#80cbc4"),
+            Map.of("name", "Other", "color", "#eeeeee")
+    );
+
+    public static final String DEFAULT_NEW_TAG_COLOR = "#dcedc8";
 
     // Helper method to convert LabelCreateDTO to LabelEntity using Lombok @Builder
     private LabelEntity toEntity(LabelCreateDTO dto, Long userId) {
@@ -119,5 +133,32 @@ public class LabelService {
             throw new UserNotAuthorizedException();
         }
         return entity;
+    }
+
+    /**
+     * Creates default labels for a given user if they don't have any labels yet.
+     * This method is designed to be idempotent: it will only create labels if the user
+     * has no existing labels in the database.
+     * @param userId The ID of the user for whom to create default labels.
+     * @throws InvalidQueryFormatException if the userId cannot be parsed.
+     */
+    public void createDefaultLabelsForUser(String userId) throws InvalidQueryFormatException {
+        Long userLongId = parseId(userId);
+
+        List<LabelEntity> existingLabels = repository.findByUserId(userLongId);
+
+        if (existingLabels.isEmpty()) {
+            System.out.println("Creating default labels for user: " + userId);
+            for (Map<String, String> data : DEFAULT_LABELS_DATA) {
+                LabelCreateDTO defaultLabelDto = new LabelCreateDTO(data.get("name"), data.get("color"));
+                try {
+                    createEntry(userId, defaultLabelDto);
+                } catch (LabelExistsException e) {
+                    System.err.println("Attempted to create a default label that already exists for user " + userId + ": " + defaultLabelDto.name());
+                }
+            }
+        } else {
+            System.out.println("User " + userId + " already has labels. Skipping default label creation.");
+        }
     }
 }
